@@ -54,9 +54,8 @@ The system allows users to search for flights, book tickets, and receive asynchr
 
 ### Step 1: Start Infrastructure
 Navigate to the root directory and start the RabbitMQ container using Docker Compose:
-
-```bash
 docker compose up -d
+
 Verify RabbitMQ is running at `http://localhost:15672` (Username/Password: `guest`/`guest`).
 
 ### Step 2: Configuration
