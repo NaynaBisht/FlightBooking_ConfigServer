@@ -4,12 +4,45 @@ server:
 spring:
   application:
     name: API-GATEWAY
-  cloud:
-    gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
+	cloud:
+	    gateway:
+	      discovery:
+	        locator:
+	          enabled: true
+	          lower-case-service-id: true
+	      
+	      # --- NEW: Explicit Routes to apply Security & Circuit Breakers ---
+	      routes:
+	        # 1. USER SERVICE (OPEN - No Security Filter)
+	        # This allows Login/Signup to pass through
+	        - id: user-service
+	          uri: lb://USER-SERVICE
+	          predicates:
+	            - Path=/api/auth/**
+
+	        # 2. FLIGHT SERVICE (SECURED + Circuit Breaker)
+	        - id: flight-service
+	          uri: lb://FLIGHT-SERVICE
+	          predicates:
+	            - Path=/flight-service/**
+	          filters:
+	            - AuthenticationFilter # <--- Your JWT Security
+	            - name: CircuitBreaker
+	              args:
+	                name: flightCircuitBreaker
+	                fallbackUri: forward:/fallback/flight # Optional: if you have a fallback
+
+	        # 3. BOOKING SERVICE (SECURED + Circuit Breaker)
+	        - id: booking-service
+	          uri: lb://BOOKING-SERVICE
+	          predicates:
+	            - Path=/booking-service/**
+	          filters:
+	            - AuthenticationFilter # <--- Your JWT Security
+	            - name: CircuitBreaker
+	              args:
+	                name: bookingCircuitBreaker
+	                fallbackUri: forward:/fallback/booking
 
 eureka:
   instance:
