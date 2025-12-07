@@ -6,20 +6,12 @@ spring:
     name: API-GATEWAY
   cloud:
     gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
-      
-      # --- NEW: Explicit Routes to apply Security & Circuit Breakers ---
       routes:
-        # 1. USER SERVICE (OPEN - No Security Filter)
-        - id: user-service
-          uri: lb://USER-SERVICE
+        - id: user-service-custom
+          uri: lb://user-service
           predicates:
             - Path=/api/auth/**
 
-        # 2. FLIGHT SERVICE (SECURED + Circuit Breaker)
         - id: flight-service
           uri: lb://FLIGHT-SERVICE
           predicates:
@@ -31,7 +23,6 @@ spring:
                 name: flightCircuitBreaker
                 fallbackUri: forward:/fallback/flight
 
-        # 3. BOOKING SERVICE (SECURED + Circuit Breaker)
         - id: booking-service
           uri: lb://BOOKING-SERVICE
           predicates:
