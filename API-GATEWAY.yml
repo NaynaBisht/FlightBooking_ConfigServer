@@ -10,7 +10,7 @@ spring:
         - id: user-service-custom
           uri: lb://user-service
           predicates:
-            - Path=/api/auth/**
+            - Path=/auth/**
 
         - id: flight-service
           uri: lb://FLIGHT-SERVICE
