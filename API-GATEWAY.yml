@@ -3,46 +3,25 @@ server:
 
 spring:
   application:
-    name: API-GATEWAY
+    name: api-gateway
+
   cloud:
     gateway:
-      routes:
-        - id: user-service-custom
-          uri: lb://user-service
-          predicates:
-            - Path=/auth/**
-
-        - id: flight-service
-          uri: lb://FLIGHT-SERVICE
-          predicates:
-            - Path=/flight-service/**
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
           filters:
-            - AuthenticationFilter
-            - name: CircuitBreaker
-              args:
-                name: flightCircuitBreaker
-                fallbackUri: forward:/fallback/flight
-
-        - id: booking-service
-          uri: lb://BOOKING-SERVICE
-          predicates:
-            - Path=/booking-service/**
-          filters:
-            - AuthenticationFilter
-            - name: CircuitBreaker
-              args:
-                name: bookingCircuitBreaker
-                fallbackUri: forward:/fallback/booking
+            - StripPrefix=1
 
 eureka:
   instance:
     prefer-ip-address: true
-    hostname: localhost
   client:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://eureka-server:8761/eureka/
 
 resilience4j:
   circuitbreaker:
@@ -50,16 +29,30 @@ resilience4j:
       flightCircuitBreaker:
         slidingWindowSize: 10
         failureRateThreshold: 50
-        waitDurationInOpenState: 10000
+        waitDurationInOpenState: 10s
         permittedNumberOfCallsInHalfOpenState: 3
+
       bookingCircuitBreaker:
         slidingWindowSize: 10
         failureRateThreshold: 50
-        waitDurationInOpenState: 10000
+        waitDurationInOpenState: 10s
         permittedNumberOfCallsInHalfOpenState: 3
+
   timelimiter:
     instances:
       flightCircuitBreaker:
-        timeoutDuration: 2s
+        timeoutDuration: 5s
       bookingCircuitBreaker:
-        timeoutDuration: 2s
+        timeoutDuration: 5s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    gateway:
+      enabled: true
+
+jwtSecret: 5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437
+jwtExpirationMs: 86400000
